@@ -1,11 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
+import LojaForm from "./LojaForm";
 
 export default async function PainelPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const { data: loja } = await supabase
+    .from("lojas")
+    .select("*")
+    .eq("user_id", user?.id)
+    .maybeSingle();
 
   return (
     <main className="min-h-screen">
@@ -17,13 +24,16 @@ export default async function PainelPage() {
       </header>
 
       <div className="max-w-5xl mx-auto px-6 py-16">
-        <h1 className="text-2xl font-semibold">Bem-vindo ao seu painel</h1>
+        <h1 className="text-2xl font-semibold">
+          {loja ? "Sua loja" : "Vamos criar sua loja"}
+        </h1>
         <p className="mt-2 text-ink/60">
           Logado como <span className="font-medium text-ink">{user?.email}</span>
         </p>
-        <p className="mt-6 text-sm text-ink/50">
-          Próximo passo: cadastrar os dados da sua loja aqui.
-        </p>
+
+        <div className="mt-8">
+          <LojaForm loja={loja} />
+        </div>
       </div>
     </main>
   );
