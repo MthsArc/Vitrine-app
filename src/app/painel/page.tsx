@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
 import LojaForm from "./LojaForm";
+import CategoriasManager from "./CategoriasManager";
 
 export default async function PainelPage() {
   const supabase = await createClient();
@@ -13,6 +14,14 @@ export default async function PainelPage() {
     .select("*")
     .eq("user_id", user?.id)
     .maybeSingle();
+
+  const { data: categorias } = loja
+    ? await supabase
+        .from("categorias")
+        .select("id, nome")
+        .eq("loja_id", loja.id)
+        .order("created_at")
+    : { data: [] };
 
   return (
     <main className="min-h-screen">
@@ -34,6 +43,19 @@ export default async function PainelPage() {
         <div className="mt-8">
           <LojaForm loja={loja} />
         </div>
+
+        {loja && (
+          <div className="mt-14 pt-10 border-t border-line max-w-lg">
+            <h2 className="text-lg font-semibold">Categorias</h2>
+            <p className="mt-1 text-sm text-ink/60">
+              Organize seus produtos em categorias — do jeito que fizer sentido
+              pro seu negócio.
+            </p>
+            <div className="mt-5">
+              <CategoriasManager lojaId={loja.id} categorias={categorias ?? []} />
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
